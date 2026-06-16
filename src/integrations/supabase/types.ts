@@ -14,7 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clips: {
+        Row: {
+          caption: string | null
+          created_at: string
+          end_sec: number | null
+          hashtags: string[] | null
+          id: string
+          output_url: string | null
+          project_id: string
+          start_sec: number | null
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          viral_score: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          end_sec?: number | null
+          hashtags?: string[] | null
+          id?: string
+          output_url?: string | null
+          project_id: string
+          start_sec?: number | null
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          viral_score?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          end_sec?: number | null
+          hashtags?: string[] | null
+          id?: string
+          output_url?: string | null
+          project_id?: string
+          start_sec?: number | null
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          viral_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clips_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          plan: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          plan?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          plan?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          created_at: string
+          duration_sec: number | null
+          id: string
+          source_type: string
+          source_url: string | null
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_sec?: number | null
+          id?: string
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_sec?: number | null
+          id?: string
+          source_type?: string
+          source_url?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
