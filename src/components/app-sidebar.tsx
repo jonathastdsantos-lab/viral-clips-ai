@@ -48,12 +48,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const active = pathname === item.url;
+                const active = pathname === item.url || (item.url === '/dashboard' && pathname === '/');
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={active}>
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
+                      <Link
+                        to={item.url}
+                        activeProps={{ className: 'active' }}
+                        className={`flex items-center gap-2 transition-colors ${active ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted/50'}`}
+                      >
+                        <item.icon className={`h-4 w-4 ${active ? 'text-primary' : ''}`} />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
