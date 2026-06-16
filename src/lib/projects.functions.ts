@@ -72,7 +72,8 @@ export const analyzeProject = createServerFn({ method: "POST" })
         output: Output.object({ schema: AnalyzeOutput }),
       });
 
-      const clips = output.clips;
+      const clips = (output.clips ?? []).slice(0, 8);
+      if (clips.length === 0) throw new Error("A IA não retornou cortes. Tente novamente.");
 
       const { error: delErr } = await supabase
         .from("clips")
