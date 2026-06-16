@@ -53,13 +53,14 @@ export const transcribeProject = createServerFn({ method: "POST" })
         .update({ status: "transcribing" })
         .eq("id", project.id);
 
-
       const filename = project.source_url.split("/").pop() || "video.mp4";
       const form = new FormData();
       form.append("file", file, filename);
       form.append("model", "whisper-1");
-      form.append("response_format", "text");
+      form.append("response_format", "verbose_json");
       form.append("language", "pt");
+      form.append("timestamp_granularities[]", "word");
+      form.append("timestamp_granularities[]", "segment");
 
       const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
         method: "POST",
@@ -70,12 +71,25 @@ export const transcribeProject = createServerFn({ method: "POST" })
         const text = await res.text();
         throw new Error(`Whisper ${res.status}: ${text.slice(0, 300)}`);
       }
-      const transcript = (await res.text()).trim();
+
+      const json = await res.json() as {
+        text: string;
+        segments: Array<{ id: number; start: number; end: number; text: string }>;
+        words: Array<{ word: string; start: number; end: number }>;
+      };
+
+      const transcript = json.text.trim();
       if (transcript.length < 10) throw new Error("Transcrição vazia retornada pelo Whisper.");
+
+      // Serializar os dados de timing como JSON para salvar na coluna transcript_data
+      const transcriptData = JSON.stringify({
+        segments: json.segments ?? [],
+        words: json.words ?? [],
+      });
 
       await supabase
         .from("projects")
-        .update({ transcript, status: "draft" })
+        .update({ transcript, transcript_data: transcriptData, status: "draft" })
         .eq("id", project.id);
 
       return { ok: true as const, length: transcript.length };

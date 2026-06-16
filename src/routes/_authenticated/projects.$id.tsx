@@ -26,6 +26,7 @@ import {
   Circle,
   Download,
   Scissors,
+  Lightbulb,
 } from "lucide-react";
 
 const STEPS: { key: string; label: string; pct: number }[] = [
@@ -66,6 +67,7 @@ type Clip = {
   viral_score: number | null;
   status: string;
   output_url: string | null;
+  reason: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
@@ -104,6 +106,7 @@ function ProjectDetail() {
   const [uploadPct, setUploadPct] = useState(0);
   const [downloading, setDownloading] = useState(false);
   const [renderingClipId, setRenderingClipId] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
@@ -123,7 +126,7 @@ function ProjectDetail() {
     setTranscript((p as Project).transcript ?? "");
     const { data: c } = await supabase
       .from("clips")
-      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url")
+      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url, reason")
       .eq("project_id", id)
       .order("viral_score", { ascending: false });
     setClips((c ?? []) as Clip[]);
@@ -168,7 +171,7 @@ function ProjectDetail() {
       await saveTranscript();
     }
     try {
-      const result = await analyze({ data: { projectId: id } });
+      const result = await analyze({ data: { projectId: id, customPrompt: customPrompt.trim() || undefined } });
       if (result.ok) await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha ao gerar cortes");
@@ -416,6 +419,20 @@ function ProjectDetail() {
               </Button>
             </div>
 
+            <div className="mb-4">
+              <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                <Lightbulb className="w-3 h-3" /> Filtro de IA (opcional)
+              </Label>
+              <Input
+                placeholder='Ex.: "momentos engraçados" ou "dicas práticas sobre dinheiro"'
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                maxLength={500}
+                className="text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Direcione a IA para um tema ou emoção específica.</p>
+            </div>
+
             {error && (
               <div className="flex gap-2 items-start p-3 mb-4 rounded-md bg-destructive/10 border border-destructive/30 text-sm text-destructive">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" /> {error}
@@ -447,6 +464,12 @@ function ProjectDetail() {
                         {c.hashtags.map((h) => (
                           <span key={h} className="text-xs text-primary">#{h.replace(/^#/, "")}</span>
                         ))}
+                      </div>
+                    )}
+                    {c.reason && (
+                      <div className="mt-3 flex items-start gap-2 p-2 rounded-md bg-primary/5 border border-primary/15">
+                        <Lightbulb className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                        <p className="text-xs text-muted-foreground">{c.reason}</p>
                       </div>
                     )}
                     <div className="flex gap-2 mt-3">

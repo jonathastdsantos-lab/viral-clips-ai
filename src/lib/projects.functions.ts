@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const AnalyzeInput = z.object({
   projectId: z.string().uuid(),
+  customPrompt: z.string().max(500).optional(),
 });
 
 type Clip = {
@@ -14,7 +15,7 @@ type Clip = {
   start_sec: number;
   end_sec: number;
   viral_score: number;
-  reason?: string;
+  reason: string;
 };
 
 function extractJson(raw: string): { clips: Clip[] } {
@@ -59,13 +60,19 @@ export const analyzeProject = createServerFn({ method: "POST" })
       const { createAIModel } = await import("./ai-gateway.server");
       const model = createAIModel();
 
+      const customInstruction = data.customPrompt
+        ? `\nFiltro do usuário: "${data.customPrompt}". Priorize momentos que atendam a este critério.`
+        : "";
+
       const system = [
         "Você é um editor de cortes virais para criadores brasileiros (TikTok, Reels, Shorts).",
-        "Receberá um transcript bruto de um vídeo longo (podcast, live, aula, pregação, etc.).",
+        "Receberá um transcript de um vídeo longo.",
         "Tarefa: identificar de 3 a 6 momentos com maior potencial viral.",
-        "Para cada corte gere: title (gancho curto e impactante em PT-BR), caption (legenda pronta para postar), hashtags (até 8, sem #), start_sec e end_sec (em segundos, estimativa razoável), viral_score (0-100), reason (por que viraliza).",
-        "Cortes devem ter 20-90 segundos. Priorize ganchos, frases marcantes, polêmica saudável, emoção, dicas práticas.",
-        "Responda APENAS no schema solicitado.",
+        "Para cada corte gere: title (gancho curto e impactante em PT-BR), caption (legenda pronta para postar com emojis), hashtags (até 8, sem #), start_sec e end_sec (em segundos), viral_score (0-100), reason (frase curta explicando por que viraliza: gancho, emoção, polêmica, dica prática etc.).",
+        "Se o transcript estiver em inglês, gere title, caption, hashtags e reason em PT-BR.",
+        "Cortes devem ter 20-90 segundos. Priorize ganchos, frases marcantes, emoção, dicas práticas.",
+        customInstruction,
+        "Responda APENAS no schema JSON solicitado.",
       ].join(" ");
 
       const prompt = `Título do projeto: ${project.title}\n\nTRANSCRIPT:\n"""\n${project.transcript.slice(0, 60000)}\n"""\n\nResponda APENAS um JSON válido neste formato exato, sem markdown:\n{"clips":[{"title":"...","caption":"...","hashtags":["tag1"],"start_sec":0,"end_sec":40,"viral_score":85,"reason":"..."}]}`;
@@ -91,6 +98,8 @@ export const analyzeProject = createServerFn({ method: "POST" })
         start_sec: c.start_sec,
         end_sec: c.end_sec,
         viral_score: Math.round(c.viral_score),
+        reason: c.reason ?? null,
+        custom_prompt: data.customPrompt ?? null,
         status: "ready",
       }));
 
