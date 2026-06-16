@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { analyzeProject } from "@/lib/projects.functions";
+import { transcribeProject } from "@/lib/transcribe.functions";
 import {
   ArrowLeft,
   Loader2,
@@ -17,6 +18,7 @@ import {
   Save,
   AlertCircle,
   Flame,
+  Wand2,
 } from "lucide-react";
 
 type Project = {
@@ -62,6 +64,7 @@ function ProjectDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const analyze = useServerFn(analyzeProject);
+  const transcribe = useServerFn(transcribeProject);
 
   const [project, setProject] = useState<Project | null>(null);
   const [clips, setClips] = useState<Clip[]>([]);
@@ -69,6 +72,7 @@ function ProjectDetail() {
   const [transcript, setTranscript] = useState("");
   const [saving, setSaving] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -202,23 +206,45 @@ function ProjectDetail() {
           </Card>
 
           <Card className="p-5 bg-surface-1 border-border">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <h2 className="font-bold flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" /> Transcript
               </h2>
-              <Button size="sm" variant="ghost" onClick={saveTranscript} disabled={saving}>
-                {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Salvar
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    setTranscribing(true);
+                    setError(null);
+                    try {
+                      await transcribe({ data: { projectId: id } });
+                      await load();
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "Falha na transcrição");
+                    } finally {
+                      setTranscribing(false);
+                    }
+                  }}
+                  disabled={transcribing || !project.source_url || project.source_type !== "upload"}
+                  title={project.source_type !== "upload" ? "Envie um arquivo de vídeo para transcrever" : "Transcrever áudio com Whisper"}
+                >
+                  {transcribing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />} Transcrever automaticamente
+                </Button>
+                <Button size="sm" variant="ghost" onClick={saveTranscript} disabled={saving}>
+                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Salvar
+                </Button>
+              </div>
             </div>
             <Textarea
               value={transcript}
               onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Cole aqui o transcript do vídeo. Dica: no YouTube clique nos 3 pontos > 'Mostrar transcrição' e copie tudo."
+              placeholder="Cole aqui o transcript ou clique em 'Transcrever automaticamente' após enviar o vídeo (até 25MB)."
               rows={14}
               className="font-mono text-xs bg-background"
             />
             <p className="text-xs text-muted-foreground mt-2">
-              {transcript.length.toLocaleString("pt-BR")} caracteres · mínimo 50 para gerar cortes.
+              {transcript.length.toLocaleString("pt-BR")} caracteres · mínimo 50 para gerar cortes · Whisper aceita até 25MB.
             </p>
           </Card>
 
