@@ -23,7 +23,6 @@ export type Database = {
           id: string
           output_url: string | null
           project_id: string
-          share_token: string | null
           start_sec: number | null
           status: string
           thumbnail_url: string | null
@@ -40,7 +39,6 @@ export type Database = {
           id?: string
           output_url?: string | null
           project_id: string
-          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
@@ -57,7 +55,6 @@ export type Database = {
           id?: string
           output_url?: string | null
           project_id?: string
-          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
@@ -83,11 +80,6 @@ export type Database = {
           display_name: string | null
           id: string
           plan: string
-          plan_expires_at: string | null
-          credits_remaining: number
-          credits_total_used: number
-          stripe_customer_id: string | null
-          mp_subscription_id: string | null
           updated_at: string
         }
         Insert: {
@@ -96,11 +88,6 @@ export type Database = {
           display_name?: string | null
           id: string
           plan?: string
-          plan_expires_at?: string | null
-          credits_remaining?: number
-          credits_total_used?: number
-          stripe_customer_id?: string | null
-          mp_subscription_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -109,11 +96,6 @@ export type Database = {
           display_name?: string | null
           id?: string
           plan?: string
-          plan_expires_at?: string | null
-          credits_remaining?: number
-          credits_total_used?: number
-          stripe_customer_id?: string | null
-          mp_subscription_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -160,182 +142,6 @@ export type Database = {
           transcript?: string | null
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      social_connections: {
-        Row: {
-          id: string
-          user_id: string
-          platform: string
-          access_token: string
-          refresh_token: string | null
-          expires_at: string | null
-          platform_user_id: string | null
-          platform_username: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          platform: string
-          access_token: string
-          refresh_token?: string | null
-          expires_at?: string | null
-          platform_user_id?: string | null
-          platform_username?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          platform?: string
-          access_token?: string
-          refresh_token?: string | null
-          expires_at?: string | null
-          platform_user_id?: string | null
-          platform_username?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      scheduled_posts: {
-        Row: {
-          id: string
-          user_id: string
-          clip_id: string
-          platform: string
-          scheduled_for: string
-          status: string
-          platform_post_id: string | null
-          error_message: string | null
-          published_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          clip_id: string
-          platform: string
-          scheduled_for: string
-          status?: string
-          platform_post_id?: string | null
-          error_message?: string | null
-          published_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          clip_id?: string
-          platform?: string
-          scheduled_for?: string
-          status?: string
-          platform_post_id?: string | null
-          error_message?: string | null
-          published_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scheduled_posts_clip_id_fkey"
-            columns: ["clip_id"]
-            isOneToOne: false
-            referencedRelation: "clips"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      credit_events: {
-        Row: {
-          id: string
-          user_id: string
-          event_type: string
-          credits_delta: number
-          description: string | null
-          project_id: string | null
-          clip_id: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          event_type: string
-          credits_delta: number
-          description?: string | null
-          project_id?: string | null
-          clip_id?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          event_type?: string
-          credits_delta?: number
-          description?: string | null
-          project_id?: string | null
-          clip_id?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "credit_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "credit_events_clip_id_fkey"
-            columns: ["clip_id"]
-            isOneToOne: false
-            referencedRelation: "clips"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      payments: {
-        Row: {
-          id: string
-          user_id: string
-          provider: string
-          provider_payment_id: string | null
-          amount_brl: number
-          plan: string
-          status: string
-          credits_granted: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          provider: string
-          provider_payment_id?: string | null
-          amount_brl: number
-          plan: string
-          status?: string
-          credits_granted?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          provider?: string
-          provider_payment_id?: string | null
-          amount_brl?: number
-          plan?: string
-          status?: string
-          credits_granted?: number
-          created_at?: string
-          updated_at?: string
         }
         Relationships: []
       }
