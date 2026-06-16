@@ -105,11 +105,13 @@ export type Database = {
           created_at: string
           duration_sec: number | null
           id: string
+          processing_error: string | null
           source_type: string
           source_url: string | null
           status: string
           thumbnail_url: string | null
           title: string
+          transcript: string | null
           updated_at: string
           user_id: string
         }
@@ -117,11 +119,13 @@ export type Database = {
           created_at?: string
           duration_sec?: number | null
           id?: string
+          processing_error?: string | null
           source_type?: string
           source_url?: string | null
           status?: string
           thumbnail_url?: string | null
           title: string
+          transcript?: string | null
           updated_at?: string
           user_id: string
         }
@@ -129,11 +133,13 @@ export type Database = {
           created_at?: string
           duration_sec?: number | null
           id?: string
+          processing_error?: string | null
           source_type?: string
           source_url?: string | null
           status?: string
           thumbnail_url?: string | null
           title?: string
+          transcript?: string | null
           updated_at?: string
           user_id?: string
         }
