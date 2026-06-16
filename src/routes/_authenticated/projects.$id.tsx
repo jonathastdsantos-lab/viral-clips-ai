@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,6 +43,7 @@ import {
   Type,
   Calendar,
   Share2,
+  Copy,
 } from "lucide-react";
 import {
   Dialog,
@@ -93,6 +95,7 @@ type Clip = {
   output_url: string | null;
   reason: string | null;
   caption_style: string | null;
+  share_token: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
@@ -172,7 +175,7 @@ function ProjectDetail() {
 
     const { data: c } = await supabase
       .from("clips")
-      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url, reason, caption_style")
+      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url, reason, caption_style, share_token")
       .eq("project_id", id)
       .order("viral_score", { ascending: false });
     const loadedClips = (c ?? []) as Clip[];
@@ -699,6 +702,21 @@ function ProjectDetail() {
                             >
                               <Download className="w-3 h-3" /> Baixar
                             </a>
+
+                            {c.share_token && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs"
+                                onClick={() => {
+                                  const url = `${window.location.origin}/clip/${c.share_token}`;
+                                  navigator.clipboard.writeText(url);
+                                  toast.success('Link de compartilhamento copiado!');
+                                }}
+                              >
+                                <Copy className="w-3 h-3" /> Compartilhar
+                              </Button>
+                            )}
 
                             <Dialog>
                               <DialogTrigger asChild>

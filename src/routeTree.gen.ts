@@ -13,10 +13,12 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClipTokenRouteImport } from './routes/clip.$token'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCortesRouteImport } from './routes/_authenticated/cortes'
+import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedAnalisesRouteImport } from './routes/_authenticated/analises'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedProjectsIdRouteImport } from './routes/_authenticated/projects.$id'
@@ -40,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClipTokenRoute = ClipTokenRouteImport.update({
+  id: '/clip/$token',
+  path: '/clip/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
@@ -60,6 +67,12 @@ const AuthenticatedCortesRoute = AuthenticatedCortesRouteImport.update({
   path: '/cortes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedConfiguracoesRoute =
+  AuthenticatedConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAnalisesRoute = AuthenticatedAnalisesRouteImport.update({
   id: '/analises',
   path: '/analises',
@@ -82,10 +95,12 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/analises': typeof AuthenticatedAnalisesRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/cortes': typeof AuthenticatedCortesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/clip/$token': typeof ClipTokenRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
 export interface FileRoutesByTo {
@@ -94,10 +109,12 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/analises': typeof AuthenticatedAnalisesRoute
+  '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/cortes': typeof AuthenticatedCortesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/clip/$token': typeof ClipTokenRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
 export interface FileRoutesById {
@@ -108,10 +125,12 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/analises': typeof AuthenticatedAnalisesRoute
+  '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/cortes': typeof AuthenticatedCortesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
+  '/clip/$token': typeof ClipTokenRoute
   '/_authenticated/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
 export interface FileRouteTypes {
@@ -122,10 +141,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/agenda'
     | '/analises'
+    | '/configuracoes'
     | '/cortes'
     | '/dashboard'
     | '/planos'
     | '/templates'
+    | '/clip/$token'
     | '/projects/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -134,10 +155,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/agenda'
     | '/analises'
+    | '/configuracoes'
     | '/cortes'
     | '/dashboard'
     | '/planos'
     | '/templates'
+    | '/clip/$token'
     | '/projects/$id'
   id:
     | '__root__'
@@ -147,10 +170,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/agenda'
     | '/_authenticated/analises'
+    | '/_authenticated/configuracoes'
     | '/_authenticated/cortes'
     | '/_authenticated/dashboard'
     | '/_authenticated/planos'
     | '/_authenticated/templates'
+    | '/clip/$token'
     | '/_authenticated/projects/$id'
   fileRoutesById: FileRoutesById
 }
@@ -159,6 +184,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ClipTokenRoute: typeof ClipTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -191,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clip/$token': {
+      id: '/clip/$token'
+      path: '/clip/$token'
+      fullPath: '/clip/$token'
+      preLoaderRoute: typeof ClipTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/templates': {
       id: '/_authenticated/templates'
       path: '/templates'
@@ -217,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/cortes'
       fullPath: '/cortes'
       preLoaderRoute: typeof AuthenticatedCortesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/configuracoes': {
+      id: '/_authenticated/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/analises': {
@@ -246,6 +286,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedAnalisesRoute: typeof AuthenticatedAnalisesRoute
+  AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedCortesRoute: typeof AuthenticatedCortesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
@@ -256,6 +297,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedAnalisesRoute: AuthenticatedAnalisesRoute,
+  AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedCortesRoute: AuthenticatedCortesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
@@ -271,6 +313,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ClipTokenRoute: ClipTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

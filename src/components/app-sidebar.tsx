@@ -1,6 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Home, Scissors, LayoutTemplate, Calendar, BarChart3, Plus, LogOut, CreditCard } from "lucide-react";
+import { Home, Scissors, LayoutTemplate, Calendar, BarChart3, Plus, LogOut, CreditCard, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +22,7 @@ const items = [
   { title: "Agenda", url: "/agenda", icon: Calendar },
   { title: "Análises", url: "/analises", icon: BarChart3 },
   { title: "Planos", url: "/planos", icon: CreditCard },
+  { title: "Configurações", url: "/configuracoes", icon: Settings },
 ] as const;
 
 export function AppSidebar() {
