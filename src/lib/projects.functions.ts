@@ -72,16 +72,11 @@ export const analyzeProject = createServerFn({ method: "POST" })
         "Responda APENAS no schema solicitado.",
       ].join(" ");
 
-      const prompt = `Título do projeto: ${project.title}\n\nTRANSCRIPT:\n"""\n${project.transcript.slice(0, 60000)}\n"""`;
+      const prompt = `Título do projeto: ${project.title}\n\nTRANSCRIPT:\n"""\n${project.transcript.slice(0, 60000)}\n"""\n\nResponda APENAS um JSON válido neste formato exato, sem markdown:\n{"clips":[{"title":"...","caption":"...","hashtags":["tag1"],"start_sec":0,"end_sec":40,"viral_score":85,"reason":"..."}]}`;
 
-      const { output } = await generateText({
-        model,
-        system,
-        prompt,
-        output: Output.object({ schema: AnalyzeOutput }),
-      });
-
-      const clips = (output.clips ?? []).slice(0, 8);
+      const { text } = await generateText({ model, system, prompt });
+      const { clips: rawClips } = extractJson(text);
+      const clips = rawClips.slice(0, 8);
       if (clips.length === 0) throw new Error("A IA não retornou cortes. Tente novamente.");
 
       const { error: delErr } = await supabase
