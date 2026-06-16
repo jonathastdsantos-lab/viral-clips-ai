@@ -73,19 +73,23 @@ function Dashboard() {
     const userId = userData.user?.id;
     if (!userId) return;
 
-    const { error } = await supabase.from("projects").insert({
-      user_id: userId,
-      title: title.trim() || "Novo projeto",
-      source_url: sourceUrl.trim() || null,
-      source_type: sourceUrl ? "url" : "upload",
-      status: "draft",
-    });
+    const { data: created, error } = await supabase
+      .from("projects")
+      .insert({
+        user_id: userId,
+        title: title.trim() || "Novo projeto",
+        source_url: sourceUrl.trim() || null,
+        source_type: sourceUrl ? "url" : "upload",
+        status: "draft",
+      })
+      .select("id")
+      .single();
     setCreating(false);
-    if (!error) {
+    if (!error && created) {
       setOpen(false);
       setTitle("");
       setSourceUrl("");
-      load();
+      navigate({ to: "/projects/$id", params: { id: created.id } });
     }
   }
 
@@ -145,7 +149,7 @@ function Dashboard() {
                     onChange={(e) => setSourceUrl(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Upload de arquivo chega na Fase 2.
+                    Você poderá enviar um arquivo dentro do projeto.
                   </p>
                 </div>
                 <DialogFooter>
