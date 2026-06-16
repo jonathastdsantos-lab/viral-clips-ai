@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { generateText, Output } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -7,19 +7,28 @@ const AnalyzeInput = z.object({
   projectId: z.string().uuid(),
 });
 
-const ClipSchema = z.object({
-  title: z.string(),
-  caption: z.string(),
-  hashtags: z.array(z.string()),
-  start_sec: z.number(),
-  end_sec: z.number(),
-  viral_score: z.number(),
-  reason: z.string(),
-});
+type Clip = {
+  title: string;
+  caption: string;
+  hashtags: string[];
+  start_sec: number;
+  end_sec: number;
+  viral_score: number;
+  reason?: string;
+};
 
-const AnalyzeOutput = z.object({
-  clips: z.array(ClipSchema),
-});
+function extractJson(raw: string): { clips: Clip[] } {
+  let s = raw.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+  const start = s.search(/[\{\[]/);
+  const end = Math.max(s.lastIndexOf("}"), s.lastIndexOf("]"));
+  if (start === -1 || end === -1) throw new Error("IA não retornou JSON.");
+  s = s.slice(start, end + 1).replace(/,\s*([}\]])/g, "$1").replace(/[\x00-\x1F\x7F]/g, " ");
+  let parsed: unknown;
+  try { parsed = JSON.parse(s); } catch { throw new Error("Falha ao interpretar JSON da IA."); }
+  const obj = Array.isArray(parsed) ? { clips: parsed } : (parsed as { clips?: Clip[] });
+  if (!obj || !Array.isArray(obj.clips)) throw new Error("JSON da IA sem campo 'clips'.");
+  return { clips: obj.clips };
+}
 
 export const analyzeProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
