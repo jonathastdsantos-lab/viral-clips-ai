@@ -239,6 +239,45 @@ function ProjectDetail() {
             </div>
           </Card>
 
+          {(transcribing || analyzing || ["queued", "downloading", "transcribing", "processing"].includes(project.status)) && (() => {
+            const busy = transcribing || analyzing;
+            const idx = stepIndex(project.status, busy);
+            const pct = idx >= 0 ? STEPS[idx].pct : busy ? 5 : 0;
+            return (
+              <Card className="p-5 bg-surface-1 border-border">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-bold flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" /> Processando
+                  </h2>
+                  <span className="text-xs text-muted-foreground">{pct}%</span>
+                </div>
+                <Progress value={pct} className="mb-4" />
+                <ol className="space-y-2">
+                  {STEPS.map((s, i) => {
+                    const done = i < idx || project.status === "ready";
+                    const active = i === idx && project.status !== "ready";
+                    return (
+                      <li key={s.key} className="flex items-center gap-3 text-sm">
+                        {done ? (
+                          <Check className="w-4 h-4 text-primary" />
+                        ) : active ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        ) : (
+                          <Circle className="w-4 h-4 text-muted-foreground/40" />
+                        )}
+                        <span className={done ? "text-foreground" : active ? "text-foreground font-medium" : "text-muted-foreground"}>
+                          {s.label}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </Card>
+            );
+          })()}
+
+
+
           <Card className="p-5 bg-surface-1 border-border">
             <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <h2 className="font-bold flex items-center gap-2">
