@@ -179,20 +179,27 @@ function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((p) => (
-              <Card key={p.id} className="p-5 bg-surface-1 border-border hover:border-primary/40 transition-colors">
-                <div className="aspect-video rounded-md bg-surface-2 mb-4 flex items-center justify-center">
-                  <Video className="w-8 h-8 text-muted-foreground/60" />
-                </div>
-                <h3 className="font-bold text-foreground truncate">{p.title}</h3>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-muted-foreground capitalize">
-                    {p.status}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(p.created_at).toLocaleDateString("pt-BR")}
-                  </span>
-                </div>
-              </Card>
+              <Link
+                key={p.id}
+                to="/projects/$id"
+                params={{ id: p.id }}
+                className="block"
+              >
+                <Card className="p-5 bg-surface-1 border-border hover:border-primary/40 transition-colors h-full">
+                  <div className="aspect-video rounded-md bg-surface-2 mb-4 flex items-center justify-center">
+                    <Video className="w-8 h-8 text-muted-foreground/60" />
+                  </div>
+                  <h3 className="font-bold text-foreground truncate">{p.title}</h3>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-muted-foreground capitalize">
+                      {p.status}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(p.created_at).toLocaleDateString("pt-BR")}
+                    </span>
+                  </div>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
