@@ -515,7 +515,7 @@ function Pricing() {
               ))}
             </ul>
             <Link
-              to="/"
+              to="/auth"
               className={`w-full py-3 rounded-lg font-bold text-sm text-center transition-colors ${
                 plan.popular
                   ? "bg-brand text-brand-foreground hover:bg-brand/90"
