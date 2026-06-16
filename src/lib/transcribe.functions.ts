@@ -28,10 +28,15 @@ export const transcribeProject = createServerFn({ method: "POST" })
 
     await supabase
       .from("projects")
-      .update({ status: "transcribing", processing_error: null })
+      .update({ status: "queued", processing_error: null })
       .eq("id", project.id);
 
     try {
+      await supabase
+        .from("projects")
+        .update({ status: "downloading" })
+        .eq("id", project.id);
+
       const { data: file, error: dlErr } = await supabase.storage
         .from("videos")
         .download(project.source_url);
@@ -42,6 +47,12 @@ export const transcribeProject = createServerFn({ method: "POST" })
           `Arquivo de ${(file.size / 1024 / 1024).toFixed(1)}MB excede o limite de 25MB do Whisper. Comprima o vídeo ou extraia o áudio antes de enviar.`,
         );
       }
+
+      await supabase
+        .from("projects")
+        .update({ status: "transcribing" })
+        .eq("id", project.id);
+
 
       const filename = project.source_url.split("/").pop() || "video.mp4";
       const form = new FormData();
