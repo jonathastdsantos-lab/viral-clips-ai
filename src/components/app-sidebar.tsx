@@ -1,5 +1,6 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Scissors, LayoutTemplate, Calendar, BarChart3, Plus, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Home, Scissors, LayoutTemplate, Calendar, BarChart3, Plus, LogOut, CreditCard } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,11 +21,27 @@ const items = [
   { title: "Templates", url: "/templates", icon: LayoutTemplate },
   { title: "Agenda", url: "/agenda", icon: Calendar },
   { title: "Análises", url: "/analises", icon: BarChart3 },
+  { title: "Planos", url: "/planos", icon: CreditCard },
 ] as const;
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [profile, setProfile] = useState<{ credits_remaining: number } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("credits_remaining")
+        .eq("id", user.id)
+        .single();
+      if (data) setProfile(data);
+    })();
+  }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -69,6 +86,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-3">
+        <div className="px-3 py-2 mb-2 rounded-md bg-surface-2">
+          <p className="text-xs text-muted-foreground">Créditos restantes</p>
+          <p className="text-lg font-bold">{profile?.credits_remaining ?? '—'}</p>
+          <Link to="/planos" className="text-xs text-primary hover:underline">Fazer upgrade →</Link>
+        </div>
         <Button variant="ghost" size="sm" onClick={signOut} className="justify-start">
           <LogOut className="w-4 h-4" /> Sair
         </Button>

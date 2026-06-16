@@ -83,6 +83,11 @@ export type Database = {
           display_name: string | null
           id: string
           plan: string
+          plan_expires_at: string | null
+          credits_remaining: number
+          credits_total_used: number
+          stripe_customer_id: string | null
+          mp_subscription_id: string | null
           updated_at: string
         }
         Insert: {
@@ -91,6 +96,11 @@ export type Database = {
           display_name?: string | null
           id: string
           plan?: string
+          plan_expires_at?: string | null
+          credits_remaining?: number
+          credits_total_used?: number
+          stripe_customer_id?: string | null
+          mp_subscription_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -99,6 +109,11 @@ export type Database = {
           display_name?: string | null
           id?: string
           plan?: string
+          plan_expires_at?: string | null
+          credits_remaining?: number
+          credits_total_used?: number
+          stripe_customer_id?: string | null
+          mp_subscription_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -236,6 +251,93 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      }
+      credit_events: {
+        Row: {
+          id: string
+          user_id: string
+          event_type: string
+          credits_delta: number
+          description: string | null
+          project_id: string | null
+          clip_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          event_type: string
+          credits_delta: number
+          description?: string | null
+          project_id?: string | null
+          clip_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          event_type?: string
+          credits_delta?: number
+          description?: string | null
+          project_id?: string | null
+          clip_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_events_clip_id_fkey"
+            columns: ["clip_id"]
+            isOneToOne: false
+            referencedRelation: "clips"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      payments: {
+        Row: {
+          id: string
+          user_id: string
+          provider: string
+          provider_payment_id: string | null
+          amount_brl: number
+          plan: string
+          status: string
+          credits_granted: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: string
+          provider_payment_id?: string | null
+          amount_brl: number
+          plan: string
+          status?: string
+          credits_granted?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: string
+          provider_payment_id?: string | null
+          amount_brl?: number
+          plan?: string
+          status?: string
+          credits_granted?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -51,6 +51,9 @@ export const analyzeProject = createServerFn({ method: "POST" })
       throw new Error("Cole um transcript de pelo menos 50 caracteres antes de gerar cortes.");
     }
 
+    const { requireCredits } = await import('./check-credits.server');
+    await requireCredits(supabase, userId, 'analyze', { projectId: data.projectId });
+
     await supabase
       .from("projects")
       .update({ status: "processing", processing_error: null })

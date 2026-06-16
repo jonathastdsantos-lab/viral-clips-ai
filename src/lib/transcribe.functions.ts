@@ -23,6 +23,9 @@ export const transcribeProject = createServerFn({ method: "POST" })
       throw new Error("Envie um arquivo de vídeo antes de transcrever automaticamente.");
     }
 
+    const { requireCredits } = await import('./check-credits.server');
+    await requireCredits(supabase, userId, 'transcribe', { projectId: data.projectId });
+
     const openaiKey = process.env.OPENAI_API_KEY;
     if (!openaiKey) throw new Error("OPENAI_API_KEY não configurada no servidor.");
 

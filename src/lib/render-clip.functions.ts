@@ -8,7 +8,10 @@ export const renderClip = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
+    const { requireCredits } = await import('./check-credits.server');
+    await requireCredits(supabase, userId, 'render', { clipId: data.clipId });
+
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token;
     if (!token) throw new Error('Não autenticado');

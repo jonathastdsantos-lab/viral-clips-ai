@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
+import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCortesRouteImport } from './routes/_authenticated/cortes'
 import { Route as AuthenticatedAnalisesRouteImport } from './routes/_authenticated/analises'
@@ -42,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
   id: '/templates',
   path: '/templates',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlanosRoute = AuthenticatedPlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/analises': typeof AuthenticatedAnalisesRoute
   '/cortes': typeof AuthenticatedCortesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/planos': typeof AuthenticatedPlanosRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/analises': typeof AuthenticatedAnalisesRoute
   '/cortes': typeof AuthenticatedCortesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/planos': typeof AuthenticatedPlanosRoute
   '/templates': typeof AuthenticatedTemplatesRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/analises': typeof AuthenticatedAnalisesRoute
   '/_authenticated/cortes': typeof AuthenticatedCortesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/_authenticated/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/analises'
     | '/cortes'
     | '/dashboard'
+    | '/planos'
     | '/templates'
     | '/projects/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/analises'
     | '/cortes'
     | '/dashboard'
+    | '/planos'
     | '/templates'
     | '/projects/$id'
   id:
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analises'
     | '/_authenticated/cortes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/planos'
     | '/_authenticated/templates'
     | '/_authenticated/projects/$id'
   fileRoutesById: FileRoutesById
@@ -186,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/planos': {
+      id: '/_authenticated/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof AuthenticatedPlanosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -229,6 +248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalisesRoute: typeof AuthenticatedAnalisesRoute
   AuthenticatedCortesRoute: typeof AuthenticatedCortesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
   AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedProjectsIdRoute: typeof AuthenticatedProjectsIdRoute
 }
@@ -238,6 +258,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalisesRoute: AuthenticatedAnalisesRoute,
   AuthenticatedCortesRoute: AuthenticatedCortesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
   AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedProjectsIdRoute: AuthenticatedProjectsIdRoute,
 }
