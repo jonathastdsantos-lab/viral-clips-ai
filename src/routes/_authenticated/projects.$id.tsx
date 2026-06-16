@@ -44,6 +44,8 @@ import {
   Calendar,
   Share2,
   Copy,
+  RotateCcw,
+  Trash2,
 } from "lucide-react";
 import {
   Dialog,
@@ -136,6 +138,8 @@ function ProjectDetail() {
   const [renderingClipId, setRenderingClipId] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // State para publicação:
   const [publishingClip, setPublishingClip] = useState<string | null>(null);
@@ -196,30 +200,49 @@ function ProjectDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Poll project status while a long task is running on the server
+  const POLLING_STATUSES = ['queued', 'downloading', 'transcribing', 'processing'];
+
   useEffect(() => {
-    if (!transcribing && !analyzing) return;
+    const shouldPoll =
+      transcribing ||
+      analyzing ||
+      (project !== null && POLLING_STATUSES.includes(project.status));
+    if (!shouldPoll) return;
+
     const t = setInterval(async () => {
       const { data: p } = await supabase
-        .from("projects")
-        .select("status, processing_error")
-        .eq("id", id)
+        .from('projects')
+        .select('status, processing_error, transcript')
+        .eq('id', id)
         .single();
-      if (p) setProject((prev) => (prev ? { ...prev, status: p.status, processing_error: p.processing_error } : prev));
+      if (p) {
+        setProject((prev) =>
+          prev ? { ...prev, status: p.status, processing_error: p.processing_error } : prev
+        );
+        if (p.status === 'ready' || p.status === 'error' || p.status === 'draft') {
+          await load();
+        }
+      }
     }, 1500);
+
     return () => clearInterval(t);
-  }, [transcribing, analyzing, id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcribing, analyzing, project?.status, id]);
 
   async function saveTranscript() {
     setSaving(true);
     setError(null);
     const { error: err } = await supabase
-      .from("projects")
+      .from('projects')
       .update({ transcript })
-      .eq("id", id);
+      .eq('id', id);
     setSaving(false);
-    if (err) setError(err.message);
-    else if (project) setProject({ ...project, transcript });
+    if (err) {
+      setError(err.message);
+    } else {
+      if (project) setProject({ ...project, transcript });
+      toast.success('Transcript salvo!');
+    }
   }
 
   async function runAnalyze() {
@@ -248,47 +271,48 @@ function ProjectDetail() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
-      if (!userId) throw new Error("Não autenticado");
+      if (!userId) throw new Error('Não autenticado');
 
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
-      if (!token) throw new Error("Sessão expirada");
+      if (!token) throw new Error('Sessão expirada, recarregue a página');
 
       const path = `${userId}/${id}/${Date.now()}-${file.name}`;
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const uploadUrl = `${supabaseUrl}/storage/v1/object/videos/${path}`;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", uploadUrl);
-        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-        xhr.setRequestHeader("x-upsert", "false");
-        xhr.setRequestHeader("cache-control", "3600");
-
-        xhr.upload.addEventListener("progress", (evt) => {
-          if (evt.lengthComputable) {
-            setUploadPct(Math.round((evt.loaded / evt.total) * 100));
-          }
+      if (supabaseUrl) {
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', `${supabaseUrl}/storage/v1/object/videos/${path}`);
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+          xhr.setRequestHeader('x-upsert', 'false');
+          xhr.setRequestHeader('cache-control', '3600');
+          xhr.upload.addEventListener('progress', (evt) => {
+            if (evt.lengthComputable) setUploadPct(Math.round((evt.loaded / evt.total) * 100));
+          });
+          xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) resolve();
+            else reject(new Error(`Upload falhou (${xhr.status}): ${xhr.responseText.slice(0, 200)}`));
+          });
+          xhr.addEventListener('error', () => reject(new Error('Erro de rede durante upload')));
+          xhr.send(file);
         });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`Upload falhou: ${xhr.status} — ${xhr.responseText.slice(0, 200)}`));
-        });
-
-        xhr.addEventListener("error", () => reject(new Error("Erro de rede durante upload")));
-        xhr.send(file);
-      });
+      } else {
+        const { error: upErr } = await supabase.storage
+          .from('videos')
+          .upload(path, file, { cacheControl: '3600', upsert: false });
+        if (upErr) throw upErr;
+        setUploadPct(100);
+      }
 
       const { error: updErr } = await supabase
-        .from("projects")
-        .update({ source_type: "upload", source_url: path })
-        .eq("id", id);
+        .from('projects')
+        .update({ source_type: 'upload', source_url: path })
+        .eq('id', id);
       if (updErr) throw updErr;
-
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro no upload");
+      setError(err instanceof Error ? err.message : 'Erro no upload');
     } finally {
       setUploading(false);
     }
@@ -326,6 +350,25 @@ function ProjectDetail() {
     }
   }
 
+  async function resetProject() {
+    setResetting(true);
+    setError(null);
+    await supabase
+      .from('projects')
+      .update({ status: 'draft', processing_error: null })
+      .eq('id', id);
+    setResetting(false);
+    await load();
+    toast.success('Projeto resetado para rascunho.');
+  }
+
+  async function deleteProject() {
+    if (!confirm('Deletar este projeto e todos os seus cortes? Ação irreversível.')) return;
+    setDeleting(true);
+    await supabase.from('projects').delete().eq('id', id);
+    navigate({ to: '/dashboard' });
+  }
+
   if (loading || !project) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -342,7 +385,30 @@ function ProjectDetail() {
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
           <h1 className="font-bold truncate flex-1">{project.title}</h1>
-          <Badge variant="secondary" className="capitalize">{project.status}</Badge>
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge variant="secondary" className="capitalize">{project.status}</Badge>
+            {(project.status === 'error' || project.status === 'processing') && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={resetProject}
+                disabled={resetting}
+                title="Resetar para rascunho"
+              >
+                {resetting ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={deleteProject}
+              disabled={deleting}
+              title="Deletar projeto"
+            >
+              {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -796,6 +862,21 @@ function ProjectDetail() {
                           </Button>
                         )}
                       </div>
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs text-muted-foreground hover:text-destructive h-6 px-2"
+                          onClick={async () => {
+                            if (!confirm('Remover este corte?')) return;
+                            await supabase.from('clips').delete().eq('id', c.id);
+                            setClips((prev) => prev.filter((x) => x.id !== c.id));
+                            toast.success('Corte removido.');
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" /> Remover
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
@@ -812,6 +893,7 @@ function ProjectDetail() {
               <li>Cole o transcript ou transcreva automaticamente com Whisper.</li>
               <li>A IA encontra os melhores momentos e gera título + legenda + hashtags.</li>
               <li>Ajuste o corte com a timeline, escolha o estilo de legenda e renderize.</li>
+              <li>Baixe o clip renderizado ou publique direto nas redes sociais.</li>
             </ol>
           </Card>
           {project.processing_error && (

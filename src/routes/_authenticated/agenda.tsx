@@ -90,6 +90,14 @@ function AgendaPage() {
         </div>
       </div>
 
+      <div className="mt-4 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 flex items-start gap-2">
+        <span className="text-amber-500 text-sm shrink-0 mt-0.5">⚠</span>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Modo demonstração.</span>{' '}
+          O agendamento real nas redes sociais está em desenvolvimento. Os itens exibidos são exemplos.
+        </p>
+      </div>
+
       {loading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />

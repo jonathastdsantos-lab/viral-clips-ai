@@ -1,4 +1,14 @@
 
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'videos',
+  'videos',
+  false,
+  536870912,
+  ARRAY['video/mp4','video/webm','video/quicktime','audio/mp4','audio/mpeg','audio/m4a','audio/webm']
+)
+ON CONFLICT (id) DO NOTHING;
+
 ALTER TABLE public.projects
   ADD COLUMN IF NOT EXISTS transcript text,
   ADD COLUMN IF NOT EXISTS processing_error text;

@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Toaster } from 'sonner';
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -29,6 +30,7 @@ function AuthLayout() {
           </main>
         </div>
       </div>
+      <Toaster richColors position="bottom-right" />
     </SidebarProvider>
   );
 }

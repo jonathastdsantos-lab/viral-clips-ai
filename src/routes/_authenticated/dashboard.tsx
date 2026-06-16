@@ -13,7 +13,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, LogOut, Video, Sparkles } from "lucide-react";
+import { Loader2, Plus, LogOut, Video, Sparkles, Trash2 } from "lucide-react";
 
 type Project = {
   id: string;
@@ -44,6 +44,7 @@ function Dashboard() {
   const [title, setTitle] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -183,27 +184,41 @@ function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((p) => (
-              <Link
-                key={p.id}
-                to="/projects/$id"
-                params={{ id: p.id }}
-                className="block"
-              >
-                <Card className="p-5 bg-surface-1 border-border hover:border-primary/40 transition-colors h-full">
-                  <div className="aspect-video rounded-md bg-surface-2 mb-4 flex items-center justify-center">
-                    <Video className="w-8 h-8 text-muted-foreground/60" />
-                  </div>
-                  <h3 className="font-bold text-foreground truncate">{p.title}</h3>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-muted-foreground capitalize">
-                      {p.status}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(p.created_at).toLocaleDateString("pt-BR")}
-                    </span>
-                  </div>
-                </Card>
-              </Link>
+              <div key={p.id} className="relative group">
+                <Link to="/projects/$id" params={{ id: p.id }} className="block">
+                  <Card className="p-5 bg-surface-1 border-border hover:border-primary/40 transition-colors h-full">
+                    <div className="aspect-video rounded-md bg-surface-2 mb-4 flex items-center justify-center">
+                      <Video className="w-8 h-8 text-muted-foreground/60" />
+                    </div>
+                    <h3 className="font-bold text-foreground truncate">{p.title}</h3>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-muted-foreground capitalize">
+                        {p.status}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(p.created_at).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                  </Card>
+                </Link>
+                <button
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded p-1.5 border border-border"
+                  title="Deletar projeto"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!confirm(`Deletar "${p.title}"? Ação irreversível.`)) return;
+                    setDeletingId(p.id);
+                    await supabase.from('projects').delete().eq('id', p.id);
+                    setProjects((prev) => prev.filter((x) => x.id !== p.id));
+                    setDeletingId(null);
+                  }}
+                >
+                  {deletingId === p.id
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : <Trash2 className="w-3 h-3" />
+                  }
+                </button>
+              </div>
             ))}
           </div>
         )}

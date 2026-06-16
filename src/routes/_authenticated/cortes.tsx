@@ -14,6 +14,7 @@ type Clip = {
   project_id: string;
   start_sec: number | null;
   end_sec: number | null;
+  output_url: string | null;
   created_at: string;
 };
 
@@ -45,7 +46,7 @@ function CortesPage() {
     (async () => {
       const { data } = await supabase
         .from("clips")
-        .select("id,title,caption,viral_score,project_id,start_sec,end_sec,created_at")
+        .select("id,title,caption,viral_score,project_id,start_sec,end_sec,output_url,created_at")
         .order("viral_score", { ascending: false, nullsFirst: false });
       setClips((data ?? []) as Clip[]);
       setLoading(false);
@@ -95,16 +96,44 @@ function CortesPage() {
                   className="block group"
                 >
                   <Card className="overflow-hidden bg-surface-1 border-border hover:border-primary/40 transition-colors">
-                    <div className="aspect-[9/16] bg-gradient-to-br from-surface-2 to-surface-1 relative flex items-end p-3">
+                    <div className="aspect-[9/16] bg-gradient-to-br from-surface-2 to-surface-1 relative overflow-hidden">
+                      {c.output_url ? (
+                        <video
+                          src={c.output_url}
+                          className="w-full h-full object-cover animate-in fade-in"
+                          muted
+                          playsInline
+                          onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
+                          onMouseLeave={(e) => {
+                            const v = e.currentTarget as HTMLVideoElement;
+                            v.pause();
+                            v.currentTime = 0;
+                          }}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center p-3">
+                          <p className="text-xs text-muted-foreground text-center font-medium line-clamp-4">
+                            {c.title}
+                          </p>
+                        </div>
+                      )}
                       <Badge className={`absolute top-2 right-2 ${scoreColor(c.viral_score)}`}>
-                        {c.viral_score ?? "—"}
+                        {c.viral_score ?? '—'}
                       </Badge>
                       <span className="absolute bottom-2 left-2 text-xs font-mono bg-black/60 text-white px-1.5 py-0.5 rounded">
                         {fmtDur(c.start_sec, c.end_sec)}
                       </span>
-                      <p className="text-sm font-bold text-foreground line-clamp-3 relative z-10 pl-6">
-                        {c.title}
-                      </p>
+                      {c.output_url && (
+                        <a
+                          href={c.output_url}
+                          download
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white rounded p-1 transition-colors z-20"
+                          title="Baixar clip"
+                        >
+                          <Download className="w-3 h-3" />
+                        </a>
+                      )}
                     </div>
                     {c.caption && (
                       <div className="p-3">
