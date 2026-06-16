@@ -106,6 +106,20 @@ function ProjectDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Poll project status while a long task is running on the server
+  useEffect(() => {
+    if (!transcribing && !analyzing) return;
+    const t = setInterval(async () => {
+      const { data: p } = await supabase
+        .from("projects")
+        .select("status, processing_error")
+        .eq("id", id)
+        .single();
+      if (p) setProject((prev) => (prev ? { ...prev, status: p.status, processing_error: p.processing_error } : prev));
+    }, 1500);
+    return () => clearInterval(t);
+  }, [transcribing, analyzing, id]);
+
   async function saveTranscript() {
     setSaving(true);
     setError(null);
