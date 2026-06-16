@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { analyzeProject } from "@/lib/projects.functions";
 import { transcribeProject } from "@/lib/transcribe.functions";
+import { downloadYoutube } from "@/lib/download-youtube.functions";
+import { renderClip } from "@/lib/render-clip.functions";
 import {
   ArrowLeft,
   Loader2,
@@ -22,6 +24,8 @@ import {
   Wand2,
   Check,
   Circle,
+  Download,
+  Scissors,
 } from "lucide-react";
 
 const STEPS: { key: string; label: string; pct: number }[] = [
@@ -61,6 +65,7 @@ type Clip = {
   end_sec: number | null;
   viral_score: number | null;
   status: string;
+  output_url: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
@@ -85,6 +90,8 @@ function ProjectDetail() {
   const navigate = useNavigate();
   const analyze = useServerFn(analyzeProject);
   const transcribe = useServerFn(transcribeProject);
+  const download = useServerFn(downloadYoutube);
+  const render = useServerFn(renderClip);
 
   const [project, setProject] = useState<Project | null>(null);
   const [clips, setClips] = useState<Clip[]>([]);
@@ -95,6 +102,8 @@ function ProjectDetail() {
   const [transcribing, setTranscribing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
+  const [downloading, setDownloading] = useState(false);
+  const [renderingClipId, setRenderingClipId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
@@ -114,7 +123,7 @@ function ProjectDetail() {
     setTranscript((p as Project).transcript ?? "");
     const { data: c } = await supabase
       .from("clips")
-      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status")
+      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url")
       .eq("project_id", id)
       .order("viral_score", { ascending: false });
     setClips((c ?? []) as Clip[]);
@@ -174,26 +183,69 @@ function ProjectDetail() {
     setUploading(true);
     setError(null);
     setUploadPct(0);
+
     try {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
-      if (!userId) throw new Error("Não autenticado");
+      if (!userId) throw new Error('Não autenticado');
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Sessão expirada');
+
       const path = `${userId}/${id}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage
-        .from("videos")
-        .upload(path, file, { cacheControl: "3600", upsert: false });
-      if (upErr) throw upErr;
-      setUploadPct(100);
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/videos/${path}`;
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.setRequestHeader('x-upsert', 'false');
+        xhr.setRequestHeader('cache-control', '3600');
+
+        xhr.upload.addEventListener('progress', (evt) => {
+          if (evt.lengthComputable) {
+            setUploadPct(Math.round((evt.loaded / evt.total) * 100));
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Upload falhou: ${xhr.status} ${xhr.responseText.slice(0, 200)}`));
+          }
+        });
+
+        xhr.addEventListener('error', () => reject(new Error('Erro de rede durante upload')));
+        xhr.send(file);
+      });
+
       const { error: updErr } = await supabase
-        .from("projects")
-        .update({ source_type: "upload", source_url: path })
-        .eq("id", id);
+        .from('projects')
+        .update({ source_type: 'upload', source_url: path })
+        .eq('id', id);
       if (updErr) throw updErr;
+
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro no upload");
+      setError(err instanceof Error ? err.message : 'Erro no upload');
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleRender(clipId: string) {
+    setRenderingClipId(clipId);
+    setError(null);
+    try {
+      await render({ data: { clipId } });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Falha no render');
+    } finally {
+      setRenderingClipId(null);
     }
   }
 
@@ -224,9 +276,34 @@ function ProjectDetail() {
               <Upload className="w-4 h-4" /> Fonte do vídeo
             </h2>
             {project.source_url && project.source_type === "url" ? (
-              <p className="text-sm text-muted-foreground break-all">
-                YouTube: <a href={project.source_url} target="_blank" rel="noreferrer" className="text-primary underline">{project.source_url}</a>
-              </p>
+              <div>
+                <p className="text-sm text-muted-foreground break-all">
+                  YouTube: <a href={project.source_url} target="_blank" rel="noreferrer" className="text-primary underline">{project.source_url}</a>
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-3"
+                  disabled={downloading}
+                  onClick={async () => {
+                    setDownloading(true);
+                    setError(null);
+                    try {
+                      await download({ data: { projectId: id } });
+                      await load();
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : 'Falha no download');
+                    } finally {
+                      setDownloading(false);
+                    }
+                  }}
+                >
+                  {downloading
+                    ? <><Loader2 className="w-3 h-3 animate-spin" /> Baixando áudio…</>
+                    : <><Download className="w-3 h-3" /> Baixar áudio do YouTube</>
+                  }
+                </Button>
+              </div>
             ) : project.source_url ? (
               <p className="text-sm text-muted-foreground break-all">Upload: {project.source_url}</p>
             ) : (
@@ -235,7 +312,17 @@ function ProjectDetail() {
             <div className="mt-3">
               <Label htmlFor="file" className="text-xs text-muted-foreground">Enviar vídeo (MP4, até ~500MB)</Label>
               <Input id="file" type="file" accept="video/*" onChange={onUpload} disabled={uploading} className="mt-1" />
-              {uploading && <p className="text-xs text-muted-foreground mt-2">Enviando… {uploadPct}%</p>}
+              {uploading && (
+                <div className="mt-2 space-y-1">
+                  <div className="w-full bg-surface-2 rounded-full h-1.5">
+                    <div
+                      className="bg-primary h-1.5 rounded-full transition-all duration-200"
+                      style={{ width: `${uploadPct}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Enviando… {uploadPct}%</p>
+                </div>
+              )}
             </div>
           </Card>
 
@@ -362,6 +449,31 @@ function ProjectDetail() {
                         ))}
                       </div>
                     )}
+                    <div className="flex gap-2 mt-3">
+                      {c.output_url ? (
+                        <a
+                          href={c.output_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-primary underline"
+                        >
+                          <Download className="w-3 h-3" /> Baixar clip
+                        </a>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={renderingClipId === c.id || !project.source_url || project.source_type !== 'upload'}
+                          onClick={() => handleRender(c.id)}
+                          title={project.source_type !== 'upload' ? 'Faça upload ou baixe o áudio antes de renderizar' : ''}
+                        >
+                          {renderingClipId === c.id
+                            ? <><Loader2 className="w-3 h-3 animate-spin" /> Renderizando…</>
+                            : <><Scissors className="w-3 h-3" /> Renderizar clip</>
+                          }
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

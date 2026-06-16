@@ -32,7 +32,7 @@ function extractJson(raw: string): { clips: Clip[] } {
 
 export const analyzeProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => AnalyzeInput.parse(input))
+  .validator((input: unknown) => AnalyzeInput.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
@@ -50,18 +50,14 @@ export const analyzeProject = createServerFn({ method: "POST" })
       throw new Error("Cole um transcript de pelo menos 50 caracteres antes de gerar cortes.");
     }
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ausente no servidor.");
-
     await supabase
       .from("projects")
       .update({ status: "processing", processing_error: null })
       .eq("id", project.id);
 
     try {
-      const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-      const gateway = createLovableAiGatewayProvider(key);
-      const model = gateway("google/gemini-2.5-flash");
+      const { createAIModel } = await import("./ai-gateway.server");
+      const model = createAIModel();
 
       const system = [
         "Você é um editor de cortes virais para criadores brasileiros (TikTok, Reels, Shorts).",
