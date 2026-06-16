@@ -8,17 +8,17 @@ const AnalyzeInput = z.object({
 });
 
 const ClipSchema = z.object({
-  title: z.string().min(3).max(120),
-  caption: z.string().min(10).max(400),
-  hashtags: z.array(z.string()).max(8),
-  start_sec: z.number().min(0),
-  end_sec: z.number().min(0),
-  viral_score: z.number().min(0).max(100),
-  reason: z.string().max(240),
+  title: z.string(),
+  caption: z.string(),
+  hashtags: z.array(z.string()),
+  start_sec: z.number(),
+  end_sec: z.number(),
+  viral_score: z.number(),
+  reason: z.string(),
 });
 
 const AnalyzeOutput = z.object({
-  clips: z.array(ClipSchema).min(1).max(8),
+  clips: z.array(ClipSchema),
 });
 
 export const analyzeProject = createServerFn({ method: "POST" })
@@ -72,7 +72,8 @@ export const analyzeProject = createServerFn({ method: "POST" })
         output: Output.object({ schema: AnalyzeOutput }),
       });
 
-      const clips = output.clips;
+      const clips = (output.clips ?? []).slice(0, 8);
+      if (clips.length === 0) throw new Error("A IA não retornou cortes. Tente novamente.");
 
       const { error: delErr } = await supabase
         .from("clips")
