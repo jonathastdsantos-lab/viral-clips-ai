@@ -13,7 +13,11 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedCortesRouteImport } from './routes/_authenticated/cortes'
+import { Route as AuthenticatedAnalisesRouteImport } from './routes/_authenticated/analises'
+import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedProjectsIdRouteImport } from './routes/_authenticated/projects.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -35,9 +39,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCortesRoute = AuthenticatedCortesRouteImport.update({
+  id: '/cortes',
+  path: '/cortes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnalisesRoute = AuthenticatedAnalisesRouteImport.update({
+  id: '/analises',
+  path: '/analises',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProjectsIdRoute = AuthenticatedProjectsIdRouteImport.update({
@@ -50,14 +74,22 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/agenda': typeof AuthenticatedAgendaRoute
+  '/analises': typeof AuthenticatedAnalisesRoute
+  '/cortes': typeof AuthenticatedCortesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/templates': typeof AuthenticatedTemplatesRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/agenda': typeof AuthenticatedAgendaRoute
+  '/analises': typeof AuthenticatedAnalisesRoute
+  '/cortes': typeof AuthenticatedCortesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/templates': typeof AuthenticatedTemplatesRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
 export interface FileRoutesById {
@@ -66,21 +98,47 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
+  '/_authenticated/analises': typeof AuthenticatedAnalisesRoute
+  '/_authenticated/cortes': typeof AuthenticatedCortesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
   '/_authenticated/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/sitemap.xml' | '/dashboard' | '/projects/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/agenda'
+    | '/analises'
+    | '/cortes'
+    | '/dashboard'
+    | '/templates'
+    | '/projects/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/sitemap.xml' | '/dashboard' | '/projects/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/agenda'
+    | '/analises'
+    | '/cortes'
+    | '/dashboard'
+    | '/templates'
+    | '/projects/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/sitemap.xml'
+    | '/_authenticated/agenda'
+    | '/_authenticated/analises'
+    | '/_authenticated/cortes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/templates'
     | '/_authenticated/projects/$id'
   fileRoutesById: FileRoutesById
 }
@@ -121,11 +179,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/templates': {
+      id: '/_authenticated/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AuthenticatedTemplatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cortes': {
+      id: '/_authenticated/cortes'
+      path: '/cortes'
+      fullPath: '/cortes'
+      preLoaderRoute: typeof AuthenticatedCortesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/analises': {
+      id: '/_authenticated/analises'
+      path: '/analises'
+      fullPath: '/analises'
+      preLoaderRoute: typeof AuthenticatedAnalisesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/agenda': {
+      id: '/_authenticated/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/projects/$id': {
@@ -139,12 +225,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
+  AuthenticatedAnalisesRoute: typeof AuthenticatedAnalisesRoute
+  AuthenticatedCortesRoute: typeof AuthenticatedCortesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedTemplatesRoute: typeof AuthenticatedTemplatesRoute
   AuthenticatedProjectsIdRoute: typeof AuthenticatedProjectsIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
+  AuthenticatedAnalisesRoute: AuthenticatedAnalisesRoute,
+  AuthenticatedCortesRoute: AuthenticatedCortesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedTemplatesRoute: AuthenticatedTemplatesRoute,
   AuthenticatedProjectsIdRoute: AuthenticatedProjectsIdRoute,
 }
 
