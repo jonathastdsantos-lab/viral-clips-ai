@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { analyzeProject } from "@/lib/projects.functions";
 import { transcribeProject } from "@/lib/transcribe.functions";
 import {
@@ -19,7 +20,26 @@ import {
   AlertCircle,
   Flame,
   Wand2,
+  Check,
+  Circle,
 } from "lucide-react";
+
+const STEPS: { key: string; label: string; pct: number }[] = [
+  { key: "queued", label: "Enfileirado", pct: 10 },
+  { key: "downloading", label: "Baixando vídeo", pct: 30 },
+  { key: "transcribing", label: "Transcrevendo áudio", pct: 60 },
+  { key: "processing", label: "Gerando cortes com IA", pct: 85 },
+  { key: "ready", label: "Pronto", pct: 100 },
+];
+
+function stepIndex(status: string, busy: boolean) {
+  const i = STEPS.findIndex((s) => s.key === status);
+  if (i >= 0) return i;
+  if (status === "draft" && busy) return 3; // transcript saved, analysis next
+  if (status === "draft") return -1;
+  if (status === "error") return -1;
+  return -1;
+}
 
 type Project = {
   id: string;
