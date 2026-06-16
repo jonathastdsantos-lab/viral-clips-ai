@@ -21,6 +21,7 @@ import { analyzeProject } from "@/lib/projects.functions";
 import { transcribeProject } from "@/lib/transcribe.functions";
 import { downloadYoutube } from "@/lib/download-youtube.functions";
 import { renderClip } from "@/lib/render-clip.functions";
+import { publishToYouTube } from "@/lib/publish-youtube.functions";
 import { CaptionEditor } from "@/components/caption-editor";
 import { CAPTION_STYLES } from "@/lib/caption-styles";
 import {
@@ -39,7 +40,17 @@ import {
   Lightbulb,
   Sliders,
   Type,
+  Calendar,
+  Share2,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const STEPS: { key: string; label: string; pct: number }[] = [
   { key: "queued", label: "Enfileirado", pct: 10 },
@@ -122,6 +133,12 @@ function ProjectDetail() {
   const [renderingClipId, setRenderingClipId] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // State para publicação:
+  const [publishingClip, setPublishingClip] = useState<string | null>(null);
+  const [scheduleDate, setScheduleDate] = useState('');
+
+  const publishYoutube = useServerFn(publishToYouTube);
 
   // Timeline trim states
   const [editingClip, setEditingClip] = useState<string | null>(null);
@@ -669,17 +686,83 @@ function ProjectDetail() {
                         )}
                       </div>
 
-                      {/* Ações: renderizar / baixar */}
+                      {/* Ações: renderizar / baixar / publicar */}
                       <div className="flex gap-2 mt-3">
                         {c.output_url ? (
-                          <a
-                            href={c.output_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-primary underline"
-                          >
-                            <Download className="w-3 h-3" /> Baixar clip
-                          </a>
+                          <div className="flex gap-2 flex-wrap">
+                            <a
+                              href={c.output_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              download
+                              className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-md border border-border hover:bg-surface-2 transition-colors"
+                            >
+                              <Download className="w-3 h-3" /> Baixar
+                            </a>
+
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm" variant="outline" className="h-7 text-xs">
+                                  <Share2 className="w-3 h-3" /> Publicar
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Publicar clip</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 py-2">
+                                  <div>
+                                    <Label className="text-sm">Plataforma</Label>
+                                    <div className="flex gap-2 mt-2">
+                                      {['YouTube Shorts', 'Instagram Reels'].map((p) => (
+                                        <Button key={p} variant="outline" size="sm" className="flex-1">
+                                          {p}
+                                        </Button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label className="text-sm">Agendar para (opcional)</Label>
+                                    <Input
+                                      type="datetime-local"
+                                      value={scheduleDate}
+                                      onChange={(e) => setScheduleDate(e.target.value)}
+                                      className="mt-1"
+                                      min={new Date().toISOString().slice(0, 16)}
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Deixe vazio para publicar agora.
+                                    </p>
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <Button
+                                    disabled={publishingClip === c.id}
+                                    onClick={async () => {
+                                      setPublishingClip(c.id);
+                                      try {
+                                        await publishYoutube({
+                                          data: {
+                                            clipId: c.id,
+                                            scheduleFor: scheduleDate ? new Date(scheduleDate).toISOString() : undefined,
+                                          },
+                                        });
+                                      } catch (err) {
+                                        setError(err instanceof Error ? err.message : String(err));
+                                      } finally {
+                                        setPublishingClip(null);
+                                      }
+                                    }}
+                                  >
+                                    {publishingClip === c.id
+                                      ? <><Loader2 className="w-3 h-3 animate-spin" /> Publicando…</>
+                                      : scheduleDate ? <><Calendar className="w-3 h-3" /> Agendar</> : <><Share2 className="w-3 h-3" /> Publicar agora</>
+                                    }
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
                         ) : (
                           <Button
                             size="sm"

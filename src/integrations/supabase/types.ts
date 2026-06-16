@@ -23,6 +23,7 @@ export type Database = {
           id: string
           output_url: string | null
           project_id: string
+          share_token: string | null
           start_sec: number | null
           status: string
           thumbnail_url: string | null
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           output_url?: string | null
           project_id: string
+          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
@@ -55,6 +57,7 @@ export type Database = {
           id?: string
           output_url?: string | null
           project_id?: string
+          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
@@ -144,6 +147,95 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      social_connections: {
+        Row: {
+          id: string
+          user_id: string
+          platform: string
+          access_token: string
+          refresh_token: string | null
+          expires_at: string | null
+          platform_user_id: string | null
+          platform_username: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          platform: string
+          access_token: string
+          refresh_token?: string | null
+          expires_at?: string | null
+          platform_user_id?: string | null
+          platform_username?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          platform?: string
+          access_token?: string
+          refresh_token?: string | null
+          expires_at?: string | null
+          platform_user_id?: string | null
+          platform_username?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scheduled_posts: {
+        Row: {
+          id: string
+          user_id: string
+          clip_id: string
+          platform: string
+          scheduled_for: string
+          status: string
+          platform_post_id: string | null
+          error_message: string | null
+          published_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          clip_id: string
+          platform: string
+          scheduled_for: string
+          status?: string
+          platform_post_id?: string | null
+          error_message?: string | null
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          clip_id?: string
+          platform?: string
+          scheduled_for?: string
+          status?: string
+          platform_post_id?: string | null
+          error_message?: string | null
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_posts_clip_id_fkey"
+            columns: ["clip_id"]
+            isOneToOne: false
+            referencedRelation: "clips"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
