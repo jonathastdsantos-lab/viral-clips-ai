@@ -100,13 +100,13 @@ function Navbar() {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            to="/"
+            to="/auth"
             className="hidden sm:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             Entrar
           </Link>
           <Link
-            to="/"
+            to="/auth"
             className="bg-foreground text-background px-4 py-2 rounded-full text-sm font-bold hover:bg-foreground/90 transition-all shadow-lg shadow-white/5"
           >
             Começar grátis
@@ -141,7 +141,7 @@ function Hero() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <Link
-            to="/"
+            to="/auth"
             className="bg-brand hover:bg-brand/90 text-brand-foreground px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-brand inline-flex items-center justify-center"
           >
             Começar grátis — sem cartão
@@ -515,7 +515,7 @@ function Pricing() {
               ))}
             </ul>
             <Link
-              to="/"
+              to="/auth"
               className={`w-full py-3 rounded-lg font-bold text-sm text-center transition-colors ${
                 plan.popular
                   ? "bg-brand text-brand-foreground hover:bg-brand/90"
@@ -593,7 +593,7 @@ function CTA() {
           corte pronto pra postar.
         </p>
         <Link
-          to="/"
+          to="/auth"
           className="inline-flex bg-brand hover:bg-brand/90 text-brand-foreground px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-brand"
         >
           Começar grátis agora
