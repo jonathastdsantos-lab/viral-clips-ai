@@ -31,6 +31,7 @@ import { HeyGenPanel } from "@/components/heygen-panel";
 import { reframeClip } from "@/lib/reframe-clip.functions";
 import { Crop } from "lucide-react";
 import { ClipEditor } from "@/components/clip-editor";
+import { ClipPreviewDialog } from "@/components/clip-preview-dialog";
 import {
   ArrowLeft,
   Loader2,
