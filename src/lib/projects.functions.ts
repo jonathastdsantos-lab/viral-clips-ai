@@ -33,7 +33,7 @@ function extractJson(raw: string): { clips: Clip[] } {
 
 export const analyzeProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) => AnalyzeInput.parse(input))
+  .inputValidator((input: unknown) => AnalyzeInput.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 

@@ -9,7 +9,7 @@ const Input = z.object({
 
 export const generateInsights = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) => Input.parse(input))
+  .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
     const { createAIModel } = await import('./ai-gateway.server');
     const model = createAIModel();

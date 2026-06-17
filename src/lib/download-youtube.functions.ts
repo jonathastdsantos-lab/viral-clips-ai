@@ -6,7 +6,7 @@ const Input = z.object({ projectId: z.string().uuid() });
 
 export const downloadYoutube = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) => Input.parse(input))
+  .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { data: { session } } = await supabase.auth.getSession();
