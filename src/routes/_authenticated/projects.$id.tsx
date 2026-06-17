@@ -30,6 +30,7 @@ import { NarrationPanel } from "@/components/narration-panel";
 import { HeyGenPanel } from "@/components/heygen-panel";
 import { reframeClip } from "@/lib/reframe-clip.functions";
 import { Crop } from "lucide-react";
+import { ClipEditor } from "@/components/clip-editor";
 import {
   ArrowLeft,
   Loader2,
@@ -156,6 +157,8 @@ function ProjectDetail() {
   const [deleting, setDeleting] = useState(false);
   const reframe = useServerFn(reframeClip);
   const [reframingClipId, setReframingClipId] = useState<string | null>(null);
+  const [clipTimes, setClipTimes] = useState<Record<string, { start: number; end: number }>>({});
+  const [videoPlayerUrl, setVideoPlayerUrl] = useState<string | null>(null);
 
   // State para publicação:
   const [publishingClip, setPublishingClip] = useState<string | null>(null);
@@ -215,6 +218,14 @@ function ProjectDetail() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (!project?.source_url || project.source_type !== 'upload') return;
+    const { data } = supabase.storage
+      .from('videos')
+      .getPublicUrl(project.source_url);
+    setVideoPlayerUrl(data.publicUrl);
+  }, [project?.source_url]);
 
   const POLLING_STATUSES = ['queued', 'downloading', 'transcribing', 'processing'];
 
@@ -631,7 +642,12 @@ function ProjectDetail() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">
-                        {fmtTime(c.start_sec)} → {fmtTime(c.end_sec)}
+                        {fmtTime(clipTimes[c.id]?.start ?? c.start_sec)} → {fmtTime(clipTimes[c.id]?.end ?? c.end_sec)}
+                        <span className="ml-2 font-medium text-primary">
+                          ({fmtTime(
+                            ((clipTimes[c.id]?.end ?? c.end_sec ?? 0) - (clipTimes[c.id]?.start ?? c.start_sec ?? 0))
+                          )})
+                        </span>
                       </p>
                       {c.caption && <p className="text-sm text-foreground/90 mb-2 whitespace-pre-wrap">{c.caption}</p>}
                       {c.hashtags && c.hashtags.length > 0 && (
@@ -666,69 +682,17 @@ function ProjectDetail() {
                         </div>
                       )}
 
-                      {/* Timeline trim handles */}
-                      {editingClip === c.id ? (
-                        <div className="mt-3 p-3 rounded-lg border border-border bg-background space-y-3">
-                          <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                            <Sliders className="w-3 h-3" /> Ajustar corte
-                          </p>
-                          <Slider
-                            min={0}
-                            max={maxDuration}
-                            step={1}
-                            value={currentTrim}
-                            onValueChange={(v) =>
-                              setTrimValues((prev) => ({ ...prev, [c.id]: v as [number, number] }))
-                            }
-                            className="w-full"
-                          />
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>Início: {fmtTime(currentTrim[0])}</span>
-                            <span>Fim: {fmtTime(currentTrim[1])}</span>
-                            <span>Duração: {fmtTime(currentTrim[1] - currentTrim[0])}</span>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1"
-                              onClick={() => setEditingClip(null)}
-                            >
-                              Cancelar
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="flex-1"
-                              disabled={savingTrim === c.id}
-                              onClick={async () => {
-                                setSavingTrim(c.id);
-                                const [s, e] = currentTrim;
-                                await supabase.from("clips").update({ start_sec: s, end_sec: e }).eq("id", c.id);
-                                setSavingTrim(null);
-                                setEditingClip(null);
-                                await load();
-                              }}
-                            >
-                              {savingTrim === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Salvar"}
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="mt-1 h-7 text-xs text-muted-foreground"
-                          onClick={() => {
-                            setTrimValues((prev) => ({
-                              ...prev,
-                              [c.id]: [c.start_sec ?? 0, c.end_sec ?? 60],
-                            }));
-                            setEditingClip(c.id);
-                          }}
-                        >
-                          <Scissors className="w-3 h-3 mr-1" /> Ajustar corte
-                        </Button>
-                      )}
+                      <ClipEditor
+                        clipId={c.id}
+                        title={c.title}
+                        initialStart={clipTimes[c.id]?.start ?? c.start_sec ?? 0}
+                        initialEnd={clipTimes[c.id]?.end ?? c.end_sec ?? 60}
+                        videoUrl={videoPlayerUrl}
+                        outputUrl={c.output_url}
+                        onSaved={(start, end) => {
+                          setClipTimes((prev) => ({ ...prev, [c.id]: { start, end } }));
+                        }}
+                      />
 
                       {/* Editor de legenda inline */}
                       {project.transcript_data && (
