@@ -6,7 +6,7 @@ const Input = z.object({ clipId: z.string().uuid() });
 
 export const renderClip = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) => Input.parse(input))
+  .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { requireCredits } = await import('./check-credits.server');

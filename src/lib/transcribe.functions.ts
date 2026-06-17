@@ -8,7 +8,7 @@ const MAX_BYTES = 25 * 1024 * 1024; // Whisper limit
 
 export const transcribeProject = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) => Input.parse(input))
+  .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 

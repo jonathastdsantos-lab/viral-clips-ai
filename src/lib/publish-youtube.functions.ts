@@ -9,7 +9,7 @@ const Input = z.object({
 
 export const publishToYouTube = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) => Input.parse(input))
+  .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
