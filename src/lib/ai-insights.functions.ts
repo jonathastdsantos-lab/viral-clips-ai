@@ -18,7 +18,7 @@ export const generateInsights = createServerFn({ method: 'POST' })
       model,
       system: 'Você é um analista de conteúdo viral brasileiro. Analise os dados de clips e gere 3 insights práticos e curtos (máximo 2 frases cada) sobre padrões de desempenho, horários, duração ideal e temas que mais viralizam. Responda em PT-BR, em formato JSON: {"insights": [{"icon": "emoji", "title": "...", "body": "..."}]}',
       prompt: `Dados dos clips do usuário: ${data.clipsData}`,
-      maxTokens: 500,
+      maxOutputTokens: 500,
     });
 
     try {
