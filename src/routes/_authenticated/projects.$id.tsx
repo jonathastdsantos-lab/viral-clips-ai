@@ -25,6 +25,11 @@ import { renderClip } from "@/lib/render-clip.functions";
 import { publishToYouTube } from "@/lib/publish-youtube.functions";
 import { CaptionEditor } from "@/components/caption-editor";
 import { CAPTION_STYLES } from "@/lib/caption-styles";
+import { TikTokPublishButton } from "@/components/tiktok-publish-button";
+import { NarrationPanel } from "@/components/narration-panel";
+import { HeyGenPanel } from "@/components/heygen-panel";
+import { reframeClip } from "@/lib/reframe-clip.functions";
+import { Crop } from "lucide-react";
 import {
   ArrowLeft,
   Loader2,
@@ -98,6 +103,15 @@ type Clip = {
   reason: string | null;
   caption_style: string | null;
   share_token: string | null;
+  published_platform: string | null;
+  published_at: string | null;
+  narration_url: string | null;
+  narration_voice_id: string | null;
+  narration_status: string | null;
+  reframe_url: string | null;
+  reframe_status: string | null;
+  heygen_video_url: string | null;
+  heygen_status: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
@@ -140,6 +154,8 @@ function ProjectDetail() {
   const [error, setError] = useState<string | null>(null);
   const [resetting, setResetting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const reframe = useServerFn(reframeClip);
+  const [reframingClipId, setReframingClipId] = useState<string | null>(null);
 
   // State para publicação:
   const [publishingClip, setPublishingClip] = useState<string | null>(null);
@@ -179,7 +195,7 @@ function ProjectDetail() {
 
     const { data: c } = await supabase
       .from("clips")
-      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url, reason, caption_style, share_token")
+      .select("id, title, caption, hashtags, start_sec, end_sec, viral_score, status, output_url, reason, caption_style, share_token, published_platform, published_at, narration_url, narration_voice_id, narration_status, reframe_url, reframe_status, heygen_video_url, heygen_status")
       .eq("project_id", id)
       .order("viral_score", { ascending: false });
     const loadedClips = (c ?? []) as Clip[];
@@ -626,6 +642,22 @@ function ProjectDetail() {
                         </div>
                       )}
 
+                      <NarrationPanel
+                        clipId={c.id}
+                        clipTitle={c.title}
+                        clipCaption={c.caption}
+                        existingNarrationUrl={c.narration_url ?? null}
+                        narrationStatus={c.narration_status ?? null}
+                      />
+
+                      <HeyGenPanel
+                        clipId={c.id}
+                        clipTitle={c.title}
+                        clipCaption={c.caption}
+                        existingVideoUrl={c.heygen_video_url ?? null}
+                        heygenStatus={c.heygen_status ?? null}
+                      />
+
                       {/* Reason */}
                       {c.reason && (
                         <div className="mb-3 flex items-start gap-2 p-2 rounded-md bg-primary/5 border border-primary/15">
@@ -768,6 +800,63 @@ function ProjectDetail() {
                             >
                               <Download className="w-3 h-3" /> Baixar
                             </a>
+
+                            <TikTokPublishButton
+                              clipId={c.id}
+                              defaultCaption={`${c.caption ?? c.title}\n\n${(c.hashtags ?? []).map((h) => `#${h.replace(/^#/, "")}`).join(" ")}`}
+                              hasOutputUrl={!!c.output_url}
+                            />
+
+                            {c.published_platform === "tiktok" && c.published_at && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                ✓ Publicado no TikTok · {new Date(c.published_at).toLocaleDateString("pt-BR")}
+                              </span>
+                            )}
+
+                            {c.output_url && !c.reframe_url && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs gap-1"
+                                disabled={reframingClipId === c.id}
+                                onClick={async () => {
+                                  setReframingClipId(c.id);
+                                  try {
+                                    const result = await reframe({ data: { clipId: c.id, mode: "face_track" } });
+                                    if (result.url) {
+                                      toast.success("Auto-reframe concluído!");
+                                      await load();
+                                    } else {
+                                      toast.info("Reframe em processamento. Aguarde alguns minutos e recarregue.");
+                                    }
+                                  } catch (e) {
+                                    toast.error(e instanceof Error ? e.message : "Erro no reframe");
+                                  } finally {
+                                    setReframingClipId(null);
+                                  }
+                                }}
+                              >
+                                {reframingClipId === c.id ? (
+                                  <>
+                                    <Loader2 className="w-3 h-3 animate-spin" /> Reframing…
+                                  </>
+                                ) : (
+                                  <>
+                                    <Crop className="w-3 h-3" /> Auto-reframe 9:16
+                                  </>
+                                )}
+                              </Button>
+                            )}
+
+                            {c.reframe_url && (
+                              <a
+                                href={c.reframe_url}
+                                download
+                                className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-md border border-primary/40 text-primary hover:bg-primary/5 transition-colors"
+                              >
+                                <Crop className="w-3 h-3" /> Baixar reframe 9:16
+                              </a>
+                            )}
 
                             {c.share_token && (
                               <Button
