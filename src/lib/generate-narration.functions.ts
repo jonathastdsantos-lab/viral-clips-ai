@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
+import { getRequestHeader } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 
@@ -11,10 +12,9 @@ const Input = z.object({
 export const generateNarration = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+  .handler(async ({ data }) => {
+    const auth = getRequestHeader('authorization');
+    const token = auth?.replace(/^Bearer\s+/i, '');
     if (!token) throw new Error('Não autenticado');
 
     const supabaseUrl = process.env.SUPABASE_URL;
