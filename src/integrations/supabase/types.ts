@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      brand_kits: {
+        Row: {
+          caption_style: string
+          created_at: string
+          font_size: number
+          highlight_color: string
+          id: string
+          logo_storage_path: string | null
+          logo_url: string | null
+          position: string
+          primary_color: string
+          updated_at: string
+          user_id: string
+          watermark_enabled: boolean
+        }
+        Insert: {
+          caption_style?: string
+          created_at?: string
+          font_size?: number
+          highlight_color?: string
+          id?: string
+          logo_storage_path?: string | null
+          logo_url?: string | null
+          position?: string
+          primary_color?: string
+          updated_at?: string
+          user_id: string
+          watermark_enabled?: boolean
+        }
+        Update: {
+          caption_style?: string
+          created_at?: string
+          font_size?: number
+          highlight_color?: string
+          id?: string
+          logo_storage_path?: string | null
+          logo_url?: string | null
+          position?: string
+          primary_color?: string
+          updated_at?: string
+          user_id?: string
+          watermark_enabled?: boolean
+        }
+        Relationships: []
+      }
       clips: {
         Row: {
           caption: string | null
@@ -305,6 +386,45 @@ export type Database = {
           published_at?: string | null
           scheduled_for?: string
           status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_connections: {
+        Row: {
+          access_token: string
+          account_id: string | null
+          account_name: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          platform: string
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          platform: string
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          platform?: string
+          refresh_token?: string | null
           updated_at?: string
           user_id?: string
         }
