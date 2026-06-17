@@ -14,18 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      brand_kits: {
+        Row: {
+          caption_style: string
+          created_at: string
+          font_size: number
+          highlight_color: string
+          id: string
+          logo_storage_path: string | null
+          logo_url: string | null
+          position: string
+          primary_color: string
+          updated_at: string
+          user_id: string
+          watermark_enabled: boolean
+        }
+        Insert: {
+          caption_style?: string
+          created_at?: string
+          font_size?: number
+          highlight_color?: string
+          id?: string
+          logo_storage_path?: string | null
+          logo_url?: string | null
+          position?: string
+          primary_color?: string
+          updated_at?: string
+          user_id: string
+          watermark_enabled?: boolean
+        }
+        Update: {
+          caption_style?: string
+          created_at?: string
+          font_size?: number
+          highlight_color?: string
+          id?: string
+          logo_storage_path?: string | null
+          logo_url?: string | null
+          position?: string
+          primary_color?: string
+          updated_at?: string
+          user_id?: string
+          watermark_enabled?: boolean
+        }
+        Relationships: []
+      }
       clips: {
         Row: {
           caption: string | null
+          caption_style: string | null
           created_at: string
+          custom_prompt: string | null
           end_sec: number | null
           hashtags: string[] | null
+          heygen_status: string | null
+          heygen_video_id: string | null
+          heygen_video_url: string | null
           id: string
+          narration_status: string | null
+          narration_url: string | null
+          narration_voice_id: string | null
           output_url: string | null
           project_id: string
+          published_at: string | null
+          published_platform: string | null
+          reason: string | null
+          reframe_status: string | null
+          reframe_url: string | null
+          share_token: string | null
           start_sec: number | null
           status: string
           thumbnail_url: string | null
+          tiktok_post_id: string | null
           title: string
           updated_at: string
           user_id: string
@@ -33,15 +129,30 @@ export type Database = {
         }
         Insert: {
           caption?: string | null
+          caption_style?: string | null
           created_at?: string
+          custom_prompt?: string | null
           end_sec?: number | null
           hashtags?: string[] | null
+          heygen_status?: string | null
+          heygen_video_id?: string | null
+          heygen_video_url?: string | null
           id?: string
+          narration_status?: string | null
+          narration_url?: string | null
+          narration_voice_id?: string | null
           output_url?: string | null
           project_id: string
+          published_at?: string | null
+          published_platform?: string | null
+          reason?: string | null
+          reframe_status?: string | null
+          reframe_url?: string | null
+          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
+          tiktok_post_id?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -49,15 +160,30 @@ export type Database = {
         }
         Update: {
           caption?: string | null
+          caption_style?: string | null
           created_at?: string
+          custom_prompt?: string | null
           end_sec?: number | null
           hashtags?: string[] | null
+          heygen_status?: string | null
+          heygen_video_id?: string | null
+          heygen_video_url?: string | null
           id?: string
+          narration_status?: string | null
+          narration_url?: string | null
+          narration_voice_id?: string | null
           output_url?: string | null
           project_id?: string
+          published_at?: string | null
+          published_platform?: string | null
+          reason?: string | null
+          reframe_status?: string | null
+          reframe_url?: string | null
+          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
+          tiktok_post_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -73,10 +199,84 @@ export type Database = {
           },
         ]
       }
+      credit_events: {
+        Row: {
+          clip_id: string | null
+          created_at: string
+          credits_delta: number
+          description: string | null
+          event_type: string
+          id: string
+          project_id: string | null
+          user_id: string
+        }
+        Insert: {
+          clip_id?: string | null
+          created_at?: string
+          credits_delta: number
+          description?: string | null
+          event_type: string
+          id?: string
+          project_id?: string | null
+          user_id: string
+        }
+        Update: {
+          clip_id?: string | null
+          created_at?: string
+          credits_delta?: number
+          description?: string | null
+          event_type?: string
+          id?: string
+          project_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_brl: number
+          created_at: string
+          credits_granted: number
+          id: string
+          plan: string
+          provider: string
+          provider_payment_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_brl: number
+          created_at?: string
+          credits_granted?: number
+          id?: string
+          plan: string
+          provider: string
+          provider_payment_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_brl?: number
+          created_at?: string
+          credits_granted?: number
+          id?: string
+          plan?: string
+          provider?: string
+          provider_payment_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          credits_remaining: number
+          credits_total_used: number
           display_name: string | null
           id: string
           plan: string
@@ -85,6 +285,8 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          credits_remaining?: number
+          credits_total_used?: number
           display_name?: string | null
           id: string
           plan?: string
@@ -93,6 +295,8 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          credits_remaining?: number
+          credits_total_used?: number
           display_name?: string | null
           id?: string
           plan?: string
@@ -112,6 +316,7 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           transcript: string | null
+          transcript_data: string | null
           updated_at: string
           user_id: string
         }
@@ -126,6 +331,7 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           transcript?: string | null
+          transcript_data?: string | null
           updated_at?: string
           user_id: string
         }
@@ -140,6 +346,118 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           transcript?: string | null
+          transcript_data?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_posts: {
+        Row: {
+          clip_id: string
+          created_at: string
+          error: string | null
+          id: string
+          platform: string
+          published_at: string | null
+          scheduled_for: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clip_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          platform: string
+          published_at?: string | null
+          scheduled_for: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clip_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          platform?: string
+          published_at?: string | null
+          scheduled_for?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_connections: {
+        Row: {
+          access_token: string
+          account_id: string | null
+          account_name: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          platform: string
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          platform: string
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string | null
+          account_name?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          platform?: string
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tiktok_connections: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          open_id: string | null
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          open_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          open_id?: string | null
+          refresh_token?: string | null
           updated_at?: string
           user_id?: string
         }

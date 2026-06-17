@@ -32,7 +32,6 @@ export async function requireCredits(
     .from('profiles')
     .update({
       credits_remaining: profile.credits_remaining - cost,
-      credits_total_used: supabase.rpc ? undefined : 0, // incrementar via função RPC
     })
     .eq('id', userId)
     .gte('credits_remaining', cost); // garantia de concorrência
