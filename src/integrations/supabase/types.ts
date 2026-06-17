@@ -17,12 +17,24 @@ export type Database = {
       clips: {
         Row: {
           caption: string | null
+          caption_style: string | null
           created_at: string
           end_sec: number | null
           hashtags: string[] | null
+          heygen_status: string | null
+          heygen_video_url: string | null
           id: string
+          narration_status: string | null
+          narration_url: string | null
+          narration_voice_id: string | null
           output_url: string | null
           project_id: string
+          published_at: string | null
+          published_platform: string | null
+          reason: string | null
+          reframe_status: string | null
+          reframe_url: string | null
+          share_token: string | null
           start_sec: number | null
           status: string
           thumbnail_url: string | null
@@ -33,12 +45,24 @@ export type Database = {
         }
         Insert: {
           caption?: string | null
+          caption_style?: string | null
           created_at?: string
           end_sec?: number | null
           hashtags?: string[] | null
+          heygen_status?: string | null
+          heygen_video_url?: string | null
           id?: string
+          narration_status?: string | null
+          narration_url?: string | null
+          narration_voice_id?: string | null
           output_url?: string | null
           project_id: string
+          published_at?: string | null
+          published_platform?: string | null
+          reason?: string | null
+          reframe_status?: string | null
+          reframe_url?: string | null
+          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
@@ -49,12 +73,24 @@ export type Database = {
         }
         Update: {
           caption?: string | null
+          caption_style?: string | null
           created_at?: string
           end_sec?: number | null
           hashtags?: string[] | null
+          heygen_status?: string | null
+          heygen_video_url?: string | null
           id?: string
+          narration_status?: string | null
+          narration_url?: string | null
+          narration_voice_id?: string | null
           output_url?: string | null
           project_id?: string
+          published_at?: string | null
+          published_platform?: string | null
+          reason?: string | null
+          reframe_status?: string | null
+          reframe_url?: string | null
+          share_token?: string | null
           start_sec?: number | null
           status?: string
           thumbnail_url?: string | null
@@ -112,6 +148,7 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           transcript: string | null
+          transcript_data: string | null
           updated_at: string
           user_id: string
         }
@@ -126,6 +163,7 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           transcript?: string | null
+          transcript_data?: string | null
           updated_at?: string
           user_id: string
         }
@@ -140,6 +178,7 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           transcript?: string | null
+          transcript_data?: string | null
           updated_at?: string
           user_id?: string
         }
