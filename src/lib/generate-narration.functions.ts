@@ -27,7 +27,9 @@ export const generateNarration = createServerFn({ method: 'POST' })
       body: JSON.stringify(data),
     });
 
-    const json = await res.json() as { ok?: boolean; url?: string; error?: string };
-    if (!res.ok) throw new Error(json.error ?? 'Falha na narração');
+    const text = await res.text();
+    let json: { ok?: boolean; url?: string; error?: string } = {};
+    try { json = JSON.parse(text); } catch { /* não-JSON */ }
+    if (!res.ok) throw new Error(json.error ?? `Falha na narração (HTTP ${res.status}): ${text.slice(0, 200)}`);
     return { ok: true as const, url: json.url! };
   });
