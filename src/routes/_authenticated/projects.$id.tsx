@@ -31,6 +31,7 @@ import { HeyGenPanel } from "@/components/heygen-panel";
 import { reframeClip } from "@/lib/reframe-clip.functions";
 import { Crop } from "lucide-react";
 import { ClipEditor } from "@/components/clip-editor";
+import { ClipPreviewDialog } from "@/components/clip-preview-dialog";
 import {
   ArrowLeft,
   Loader2,
@@ -752,7 +753,14 @@ function ProjectDetail() {
                       </div>
 
                       {/* Ações: renderizar / baixar / publicar */}
-                      <div className="flex gap-2 mt-3">
+                      <div className="flex gap-2 mt-3 flex-wrap items-center">
+                        <ClipPreviewDialog
+                          videoUrl={videoPlayerUrl}
+                          outputUrl={c.output_url}
+                          start={clipTimes[c.id]?.start ?? c.start_sec ?? 0}
+                          end={clipTimes[c.id]?.end ?? c.end_sec ?? 60}
+                          title={c.title}
+                        />
                         {c.output_url ? (
                           <div className="flex gap-2 flex-wrap">
                             <a
