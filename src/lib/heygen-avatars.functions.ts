@@ -9,12 +9,19 @@ export const listHeyGenAvatars = createServerFn({ method: 'GET' })
 
     const res = await fetch('https://api.heygen.com/v2/avatars', {
       headers: {
-        'X-Api-Key': apiKey,
+        'x-api-key': apiKey,
         Accept: 'application/json',
       },
     });
 
-    if (!res.ok) throw new Error(`HeyGen error: ${res.status}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.error('HeyGen /v2/avatars error', res.status, body.slice(0, 300));
+      const msg = res.status === 401
+        ? 'HEYGEN_API_KEY inválida ou sem permissão (401). Verifique a chave no painel HeyGen.'
+        : `HeyGen error ${res.status}`;
+      return { ok: false as const, configured: true, avatars: [], error: msg };
+    }
     const json = await res.json() as {
       data: {
         avatars: Array<{
