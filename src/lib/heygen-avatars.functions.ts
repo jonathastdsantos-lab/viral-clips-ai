@@ -5,7 +5,7 @@ export const listHeyGenAvatars = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
     const apiKey = process.env.HEYGEN_API_KEY;
-    if (!apiKey) throw new Error('HEYGEN_API_KEY não configurada.');
+    if (!apiKey) return { ok: false as const, configured: false, avatars: [], error: 'HEYGEN_API_KEY não configurada.' };
 
     const res = await fetch('https://api.heygen.com/v2/avatars', {
       headers: {
