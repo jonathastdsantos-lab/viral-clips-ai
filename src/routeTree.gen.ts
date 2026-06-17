@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ClipTokenRouteImport } from './routes/clip.$token'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthenticatedTemplatesRouteImport } from './routes/_authenticated/templates'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
@@ -46,6 +47,11 @@ const IndexRoute = IndexRouteImport.update({
 const ClipTokenRoute = ClipTokenRouteImport.update({
   id: '/clip/$token',
   path: '/clip/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTemplatesRoute = AuthenticatedTemplatesRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/api/health': typeof ApiHealthRoute
   '/clip/$token': typeof ClipTokenRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/templates': typeof AuthenticatedTemplatesRoute
+  '/api/health': typeof ApiHealthRoute
   '/clip/$token': typeof ClipTokenRoute
   '/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/templates': typeof AuthenticatedTemplatesRoute
+  '/api/health': typeof ApiHealthRoute
   '/clip/$token': typeof ClipTokenRoute
   '/_authenticated/projects/$id': typeof AuthenticatedProjectsIdRoute
 }
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/planos'
     | '/templates'
+    | '/api/health'
     | '/clip/$token'
     | '/projects/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/planos'
     | '/templates'
+    | '/api/health'
     | '/clip/$token'
     | '/projects/$id'
   id:
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diagnostico'
     | '/_authenticated/planos'
     | '/_authenticated/templates'
+    | '/api/health'
     | '/clip/$token'
     | '/_authenticated/projects/$id'
   fileRoutesById: FileRoutesById
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ClipTokenRoute: typeof ClipTokenRoute
 }
 
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       path: '/clip/$token'
       fullPath: '/clip/$token'
       preLoaderRoute: typeof ClipTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/templates': {
@@ -335,18 +355,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ClipTokenRoute: ClipTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

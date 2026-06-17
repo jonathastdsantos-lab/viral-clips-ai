@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ServerReadyGate } from "../components/server-ready-gate";
 
 function NotFoundComponent() {
   return (
@@ -137,7 +138,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <ServerReadyGate>
+        <Outlet />
+      </ServerReadyGate>
     </QueryClientProvider>
   );
 }
