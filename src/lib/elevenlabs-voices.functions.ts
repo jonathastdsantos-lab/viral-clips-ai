@@ -5,7 +5,7 @@ export const listElevenLabsVoices = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
     const apiKey = process.env.ELEVENLABS_API_KEY;
-    if (!apiKey) throw new Error('ELEVENLABS_API_KEY não configurada.');
+    if (!apiKey) return { ok: false as const, configured: false, voices: [], error: 'ELEVENLABS_API_KEY não configurada.' };
 
     const res = await fetch('https://api.elevenlabs.io/v1/voices', {
       headers: { 'xi-api-key': apiKey },
